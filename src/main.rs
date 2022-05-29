@@ -1,4 +1,4 @@
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpListener};
 mod handle_request;
 mod file_handler;
 use std::env;
@@ -23,7 +23,5 @@ fn main() {
     for stream in listener.incoming() {
         let mut stream = stream.unwrap();
         handle_request::handle_request(&mut stream, &responses);
-
-        println!("Connection established!");
     }
 }

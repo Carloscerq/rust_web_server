@@ -1,5 +1,5 @@
 use std::io::prelude::*;
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpStream};
 
 fn send_error_response(stream: &mut TcpStream, error_code: &str, error_message: &str) {
     let content = std::fs::read_to_string(format!("src/error_pages/{}.html", error_code)).unwrap();
@@ -22,9 +22,9 @@ pub fn create_response(files: &Vec<String>) -> Vec<(String, String)> {
         let path = file.split("/").last().unwrap().split(".").collect::<Vec<&str>>();
 
         if path[0] == "index" {
-            header = "Request: GET / HTTP/1.1".to_string();
+            header = "GET / HTTP/1.1".to_string();
         } else {
-            header = format!("Request: GET /{} HTTP/1.1", path[0]);
+            header = format!("GET /{} HTTP/1.1", path[0]);
         }
 
         headers.push((response, header));
@@ -34,7 +34,7 @@ pub fn create_response(files: &Vec<String>) -> Vec<(String, String)> {
 
 fn send_response(stream: &mut TcpStream, response: &Vec<(String, String)>, request: &str) {
     for (response, header) in response {
-        if header.contains(request) {
+        if request.contains(header) {
             stream.write(response.as_bytes()).unwrap();
             stream.flush().unwrap();
             break;
@@ -49,6 +49,5 @@ pub fn handle_request(stream: &mut TcpStream, responses: &Vec<(String, String)>)
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
 
-    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
     send_response(stream, responses, &request);
 }
